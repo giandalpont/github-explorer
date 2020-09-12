@@ -1,5 +1,11 @@
 import React from 'react';
+import Routes from './routes';
+import { BrowserRouter } from 'react-router-dom'
 
-export const App = () => (
-  <h1>Git explorer</h1>
+const App: React.FC = () => (
+  <BrowserRouter>
+    <Routes />
+  </BrowserRouter>
 )
+
+export default App
