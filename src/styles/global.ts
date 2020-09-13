@@ -15,7 +15,6 @@ export default createGlobalStyle`
     -webkit-font-smoothing: antialiased;
     background-image: url(${githubBG});
     background-repeat: no-repeat;
-    background-position: center;
     background-position-x: 70%;
   }
 
