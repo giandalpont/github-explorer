@@ -29,17 +29,14 @@ const Dashboard: React.FC = () => {
     }
 
     try {
-      // Adição de um novo repositório
       const response = await api.get(`repos/${newRepo}`)
 
       const repository = response.data;
 
-      setRepositories([...repositories, repository])
+      setRepositories([repository, ...repositories])
 
       setNewRepo('')
       setInputError('')
-      // Consumor API do Github
-      // Salvar novo repositório no estado
     } catch (err) {
       setInputError('Erro na busca por esse repositório')
     }
