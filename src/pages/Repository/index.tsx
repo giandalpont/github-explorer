@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouteMatch, Link } from 'react-router-dom'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
+import api from '../../services/api'
 
 import logoImg from '../../assets/github-logo.svg'
 
@@ -10,8 +11,52 @@ interface RepositoryParams {
   repository: string;
 }
 
+interface RepositoryProps {
+  full_name: string;
+  description: string;
+  stargazers_count: number;
+  forks_count: number;
+  open_issues_count: number;
+  owner: {
+    login: string;
+    avatar_url: string;
+  }
+}
+
+interface IssuesProps {
+  id: number;
+  title: string;
+  html_url: string;
+  user: {
+    login: string;
+  }
+}
+
 const Repository: React.FC = () => {
+  const [repository, setRepository] = useState<RepositoryProps | null>(null)
+  const [issues, setIssues] = useState<IssuesProps[]>([])
+
   const { params } = useRouteMatch<RepositoryParams>()
+
+  useEffect( () => {
+    api.get(`repos/${params.repository}`).then(response => {
+      setRepository(response.data)
+    })
+    api.get(`repos/${params.repository}/issues`).then(response => {
+      setIssues(response.data)
+    })
+
+    // async function loadData(): Promise<void> {
+    //   const [repository, issues] = await Promise.all([
+    //     api.get(`repos/${params.repository}`),
+    //     api.get(`repos/${params.repository}/issues`)
+    //   ])
+    //   console.log(repository)
+    //   console.log(issues)
+    // }
+    // loadData()
+
+  }, [params.repository])
 
   return(
     <>
@@ -22,37 +67,45 @@ const Repository: React.FC = () => {
           Voltar
         </Link>
       </Header>
-      <RepositoryInfo>
-        <header>
-          <img src="https://avatars0.githubusercontent.com/u/35267440?s=460&u=dbc4b151478e06291f3048d65f9cfc58c9515a3f&v=4" alt=""/>
-          <div>
-            <h2>{params.repository}</h2>
-            <p>description</p>
-          </div>
-        </header>
-        <ul>
-          <li>
-            <strong>234</strong>
-            <span>Stars</span>
-          </li>
-          <li>
-            <strong>234</strong>
-            <span>Forks</span>
-          </li>
-          <li>
-            <strong>234</strong>
-            <span>Issues abertas</span>
-          </li>
-        </ul>
-      </RepositoryInfo>
+      { repository && (
+        <RepositoryInfo>
+          <header>
+            <img src={repository.owner.avatar_url} alt={repository.owner.login}/>
+            <div>
+              <h2>{repository.full_name}</h2>
+              <p>{repository.description ? repository.description : 'no description'}</p>
+            </div>
+          </header>
+          <ul>
+            <li>
+              <strong>{repository.stargazers_count}</strong>
+              <span>Stars</span>
+            </li>
+            <li>
+              <strong>{repository.forks_count}</strong>
+              <span>Forks</span>
+            </li>
+            <li>
+              <strong>{repository.open_issues_count}</strong>
+              <span>Issues abertas</span>
+            </li>
+          </ul>
+        </RepositoryInfo>
+      ) }
       <Issues>
-        <Link to={`gian`}>
-          <div>
-            <h2>Name</h2>
-            <p>jhadsgfjasdghfjksdg</p>
-          </div>
-          <FiChevronRight size={20} />
-        </Link>
+        { issues.length !== 0 ? issues.map( issue => (
+            <a key={issue.id} target="_blank" href={issue.html_url} rel="noopener noreferrer" >
+              <div>
+                <h2>{issue.title}</h2>
+                <p>{issue.user.login}</p>
+              </div>
+              <FiChevronRight size={20} />
+            </a>
+          )) : 
+          <a href="https://github.com/giandalpont/github-explorer/issues/new" target="_blank" rel="noopener noreferrer" >
+            <div><h2> criar um issue</h2> </div>
+          </a>
+        }
       </Issues>
     </>
   )
